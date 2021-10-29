@@ -1,8 +1,10 @@
-from flask.cli import FlaskGroup
+import flask.cli
 
-from src import app, db
+from src import create_app, db
+from src.api.models import Url
 
-cli = FlaskGroup(app)
+app = create_app()
+cli = flask.cli.FlaskGroup(create_app=create_app)
 
 
 @cli.command('recreate_db')
