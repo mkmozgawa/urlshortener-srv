@@ -17,6 +17,9 @@ def create_app(script_info=None):
     from src.api.hello import hello_bp
     app.register_blueprint(hello_bp)
 
+    from src.api.urls import urls_bp
+    app.register_blueprint(urls_bp)
+
     @app.shell_context_processor
     def ctx():
         return {'app': app, 'db': db}
