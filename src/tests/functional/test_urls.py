@@ -1,6 +1,3 @@
-import json
-
-
 def test_create_without_providing_custom_name(test_app, test_database, test_url):
     client = test_app.test_client()
     status_code, data = test_url(client, target_url='https://google.com')
