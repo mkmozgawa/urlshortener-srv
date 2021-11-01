@@ -21,12 +21,15 @@ class Url(db.Model):
             raise ValueError
 
     def create_custom(self, custom_name=None):
-        if is_custom_name_valid(custom_name):
+        if is_custom_name_valid(custom_name) and not exists_in_db(custom_name):
             self.custom_name = custom_name
         else:
-            # TODO add and use Random Word Generator
-            self.custom_name = 'potatoes'
+            self.custom_name = get_word()
         return self
+
+
+def exists_in_db(custom_name):
+    return True if Url.query.filter_by(custom_name=custom_name).first() else False
 
 
 def is_responding(url):
@@ -46,7 +49,17 @@ def is_custom_name_valid(custom_name):
     :param custom_name:
     :return: True if a valid name, False otherwise
     """
-    return custom_name and \
-           3 < len(custom_name) < 26 and \
-           custom_name.isascii() and \
-           not any([char in custom_name for char in string.whitespace])
+    return (
+            custom_name
+            and 3 < len(custom_name) < 26
+            and custom_name.isascii()
+            and all(char not in custom_name for char in string.whitespace)
+    )
+
+
+def get_word():
+    resp = requests.get('https://random-words-api.vercel.app/word')
+    word = resp.json()[0]['word']
+    if exists_in_db(word):
+        raise KeyError
+    return word

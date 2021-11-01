@@ -1,10 +1,7 @@
 import json
 
-from src.api.models import Url
-
 
 def test_create_without_providing_custom_name(test_app, test_database):
-    test_database.session.query(Url).delete()
     client = test_app.test_client()
     resp = client.post(
         '/url',
@@ -20,8 +17,28 @@ def test_create_without_providing_custom_name(test_app, test_database):
     assert type(data['custom_name']) == str
 
 
+def test_the_same_generated_custom_name_is_not_returned(test_app, test_database):
+    client = test_app.test_client()
+    resp_1 = client.post(
+        '/url',
+        data=json.dumps({
+            'target_url': 'https://google.com'
+        }),
+        content_type='application/json'
+    )
+    resp_2 = client.post(
+        '/url',
+        data=json.dumps({
+            'target_url': 'https://google.com'
+        }),
+        content_type='application/json'
+    )
+    data_1 = json.loads(resp_1.data.decode())
+    data_2 = json.loads(resp_2.data.decode())
+    assert data_1['custom_name'] != data_2['custom_name']
+
+
 def test_create_with_providing_custom_name(test_app, test_database):
-    test_database.session.query(Url).delete()
     client = test_app.test_client()
     resp = client.post(
         '/url',
@@ -38,7 +55,6 @@ def test_create_with_providing_custom_name(test_app, test_database):
 
 
 def test_returns_error_if_no_target_provided(test_app, test_database):
-    test_database.session.query(Url).delete()
     client = test_app.test_client()
     resp = client.post(
         '/url',
@@ -53,7 +69,6 @@ def test_returns_error_if_no_target_provided(test_app, test_database):
 
 
 def test_returns_error_if_target_is_not_responding(test_app, test_database):
-    test_database.session.query(Url).delete()
     client = test_app.test_client()
     resp = client.post(
         '/url',
@@ -68,7 +83,6 @@ def test_returns_error_if_target_is_not_responding(test_app, test_database):
 
 
 def test_returns_error_if_custom_name_is_taken(test_app, test_database):
-    test_database.session.query(Url).delete()
     client = test_app.test_client()
     client.post(
         '/url',
@@ -92,7 +106,6 @@ def test_returns_error_if_custom_name_is_taken(test_app, test_database):
 
 
 def test_returns_no_error_for_invalid_custom_names(test_app, test_database):
-    test_database.session.query(Url).delete()
     client = test_app.test_client()
     resp = client.post(
         '/url',
