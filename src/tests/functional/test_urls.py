@@ -1,7 +1,10 @@
 import json
 
+from src.api.models import Url
+
 
 def test_create_without_providing_custom_name(test_app, test_database):
+    test_database.session.query(Url).delete()
     client = test_app.test_client()
     resp = client.post(
         '/url',
@@ -18,6 +21,7 @@ def test_create_without_providing_custom_name(test_app, test_database):
 
 
 def test_create_with_providing_custom_name(test_app, test_database):
+    test_database.session.query(Url).delete()
     client = test_app.test_client()
     resp = client.post(
         '/url',
@@ -34,6 +38,7 @@ def test_create_with_providing_custom_name(test_app, test_database):
 
 
 def test_returns_error_if_no_target_provided(test_app, test_database):
+    test_database.session.query(Url).delete()
     client = test_app.test_client()
     resp = client.post(
         '/url',
@@ -48,6 +53,7 @@ def test_returns_error_if_no_target_provided(test_app, test_database):
 
 
 def test_returns_error_if_target_is_not_responding(test_app, test_database):
+    test_database.session.query(Url).delete()
     client = test_app.test_client()
     resp = client.post(
         '/url',
@@ -62,6 +68,7 @@ def test_returns_error_if_target_is_not_responding(test_app, test_database):
 
 
 def test_returns_error_if_custom_name_is_taken(test_app, test_database):
+    test_database.session.query(Url).delete()
     client = test_app.test_client()
     client.post(
         '/url',
@@ -82,3 +89,20 @@ def test_returns_error_if_custom_name_is_taken(test_app, test_database):
     data = json.loads(resp.data.decode())
     assert resp.status_code == 400
     assert data['message'] == 'Custom name taken, try another'
+
+
+def test_returns_no_error_for_invalid_custom_names(test_app, test_database):
+    test_database.session.query(Url).delete()
+    client = test_app.test_client()
+    resp = client.post(
+        '/url',
+        data=json.dumps({
+            'target_url': 'https://google.com',
+            'custom_name': 'aa'
+        }),
+        content_type='application/json'
+    )
+    data = json.loads(resp.data.decode())
+    assert resp.status_code == 201
+    assert data['target_url'] == 'https://google.com'
+    assert data['custom_name']

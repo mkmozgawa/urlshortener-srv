@@ -1,3 +1,4 @@
+import string
 import uuid
 
 import requests as requests
@@ -20,7 +21,7 @@ class Url(db.Model):
             raise ValueError
 
     def create_custom(self, custom_name=None):
-        if custom_name:
+        if is_custom_name_valid(custom_name):
             self.custom_name = custom_name
         else:
             # TODO add and use Random Word Generator
@@ -34,3 +35,18 @@ def is_responding(url):
         return r.ok
     except Exception as e:
         return False
+
+
+def is_custom_name_valid(custom_name):
+    """
+    Checks that the name:
+    * is between 4 and 25 chars
+    * contains only ascii chars
+    * doesn't contain any whitespace characters
+    :param custom_name:
+    :return: True if a valid name, False otherwise
+    """
+    return custom_name and \
+           3 < len(custom_name) < 26 and \
+           custom_name.isascii() and \
+           not any([char in custom_name for char in string.whitespace])
