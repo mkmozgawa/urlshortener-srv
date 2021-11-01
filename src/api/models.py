@@ -29,7 +29,7 @@ class Url(db.Model):
 
 
 def exists_in_db(custom_name):
-    return True if Url.query.filter_by(custom_name=custom_name).first() else False
+    return bool(Url.query.filter_by(custom_name=custom_name).first())
 
 
 def is_responding(url):

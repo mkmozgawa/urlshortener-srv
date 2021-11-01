@@ -20,8 +20,6 @@ class Urls(Resource):
         post_data = request.get_json()
         target_url = post_data.get('target_url')
         custom_name = post_data.get('custom_name')
-        if exists_in_db(custom_name):
-            return {'message': 'Custom name taken, try another'}, 400
         try:
             custom_url = Url(target_url).create_custom(custom_name)
         except ValueError:
