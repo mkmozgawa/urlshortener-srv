@@ -8,7 +8,6 @@ urls_bp = Blueprint('urls', __name__)
 api = Api(urls_bp)
 
 url = api.model('Url', {
-    'id': fields.String(readOnly=True),
     'target_url': fields.String(required=True, description='Url to be redirected to'),
     'custom_name': fields.String(description='Url name to be used as a shortcut')
 })
@@ -16,6 +15,7 @@ url = api.model('Url', {
 
 class Urls(Resource):
     @api.expect(url, validate=True)
+    @api.doc(responses={201: 'Created', 400: 'Client error'})
     def post(self):
         post_data = request.get_json()
         target_url = post_data.get('target_url')
