@@ -1,5 +1,6 @@
 import uuid
 
+import requests as requests
 from sqlalchemy.dialects.postgresql import UUID
 
 from src import db
@@ -13,7 +14,10 @@ class Url(db.Model):
     custom_name = db.Column(db.String(64), unique=True)
 
     def __init__(self, target_url):
-        self.target_url = target_url
+        if is_responding(target_url):
+            self.target_url = target_url
+        else:
+            raise ValueError
 
     def create_custom(self, custom_name=None):
         if custom_name:
@@ -22,3 +26,11 @@ class Url(db.Model):
             # TODO add and use Random Word Generator
             self.custom_name = 'potatoes'
         return self
+
+
+def is_responding(url):
+    try:
+        r = requests.head(url)
+        return r.ok
+    except Exception as e:
+        return False

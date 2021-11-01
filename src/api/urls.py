@@ -9,8 +9,8 @@ api = Api(urls_bp)
 
 url = api.model('Url', {
     'id': fields.String(readOnly=True),
-    'target_url': fields.String(required=True),
-    'custom_name': fields.String
+    'target_url': fields.String(required=True, description='Url to be redirected to'),
+    'custom_name': fields.String(description='Url name to be used as a shortcut')
 })
 
 
@@ -22,10 +22,13 @@ class Urls(Resource):
         custom_name = post_data.get('custom_name')
         if Url.query.filter_by(custom_name=custom_name).first():
             return {'message': 'Custom name taken, try another'}, 400
-        url = Url(target_url).create_custom(custom_name)
-        db.session.add(url)
+        try:
+            custom_url = Url(target_url).create_custom(custom_name)
+        except ValueError:
+            return {'message': '\'target_url\' is incorrect, did you forget to add https://?'}, 400
+        db.session.add(custom_url)
         db.session.commit()
-        return {'target_url': url.target_url, 'custom_name': url.custom_name}, 201
+        return {'target_url': custom_url.target_url, 'custom_name': custom_url.custom_name}, 201
 
 
 api.add_resource(Urls, '/url')
