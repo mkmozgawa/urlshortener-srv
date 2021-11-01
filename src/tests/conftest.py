@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 from src import db, create_app
@@ -17,3 +19,15 @@ def test_database():
     yield db
     db.session.remove()
     db.drop_all()
+
+
+@pytest.fixture(scope='function')
+def test_url():
+    def _test_url(client, **kwargs):
+        resp = client.post(
+            '/url',
+            data=json.dumps(kwargs),
+            content_type='application/json'
+        )
+        return resp.status_code, json.loads(resp.data.decode())
+    return _test_url

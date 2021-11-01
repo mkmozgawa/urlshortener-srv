@@ -2,7 +2,7 @@ from flask import Blueprint, request
 from flask_restx import Resource, Api, fields
 
 from src import db
-from src.api.models import Url, exists_in_db
+from src.api.models import Url
 
 urls_bp = Blueprint('urls', __name__)
 api = Api(urls_bp)
@@ -25,7 +25,7 @@ class Urls(Resource):
         except ValueError:
             return {'message': '\'target_url\' is incorrect, did you forget to add https://?'}, 400
         except KeyError:
-            return {'message': 'Name generation failed, please try again'}
+            return {'message': 'Name generation failed, please try again'}, 400
         db.session.add(custom_url)
         db.session.commit()
         return {'target_url': custom_url.target_url, 'custom_name': custom_url.custom_name}, 201
