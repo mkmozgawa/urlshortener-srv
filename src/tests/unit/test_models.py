@@ -1,12 +1,29 @@
-from src.api.models import is_custom_name_valid
+import pytest
+import requests.exceptions
+
+from src.api.models import Url
 
 
-def test_is_custom_name_valid_rejects_invalid_names():
-    assert not is_custom_name_valid(3*'a')
-    assert not is_custom_name_valid(26*'a')
-    assert not is_custom_name_valid('goog le')
-    assert not is_custom_name_valid('goog\nle')
-    assert not is_custom_name_valid('goog\rle')
-    assert not is_custom_name_valid('goog\vle')
-    assert not is_custom_name_valid('')
-    assert not is_custom_name_valid(None)
+def test_urls_with_invalid_custom_names_cannot_be_created(test_app, test_database):
+    url = Url('https://google.com')
+    assert url.create_custom(3 * 'a').custom_name != 3 * 'a'
+    assert url.create_custom(26 * 'a').custom_name != 26 * 'a'
+    assert url.create_custom('goog le').custom_name != 'goog le'
+    assert url.create_custom('goog\nle').custom_name != 'goog\nle'
+    assert url.create_custom('goog\rle').custom_name != 'goog\rle'
+    assert url.create_custom('goog\vle').custom_name != 'goog\vle'
+    assert url.create_custom('').custom_name != ''
+    assert url.create_custom(None).custom_name is not None
+
+
+def test_urls_with_invalid_target_urls_cannot_be_created(test_app, test_database):
+    with pytest.raises(requests.exceptions.InvalidURL):
+        Url('')
+    with pytest.raises(requests.exceptions.ConnectionError):
+        Url('https://thisdomainprobablyshouldntexistpotatosalad.com')
+
+
+def test_urls_without_schema_should_have_it_added(test_app, test_database):
+    assert Url('google.com').target_url == 'https://google.com'
+    assert Url('https://google.com').target_url == 'https://google.com'
+    assert Url('http://google.com').target_url == 'http://google.com'

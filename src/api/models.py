@@ -17,7 +17,11 @@ class Url(db.Model):
 
     @validates('target_url')
     def validate_target_url(self, key, target_url):
-        r = requests.head(target_url)
+        if target_url.startswith('http://') or target_url.startswith('https://'):
+            r = requests.head(target_url)
+        else:
+            target_url = 'https://' + target_url
+            r = requests.head(target_url)
         return target_url
 
     @validates('custom_name')

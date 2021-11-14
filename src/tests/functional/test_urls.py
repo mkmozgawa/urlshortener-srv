@@ -1,9 +1,9 @@
-# url shortening tests
 import pytest
 
 from src.api.models import Url
 
 
+# url shortening tests
 def test_create_without_providing_custom_name(test_app, test_database, test_create_url):
     client = test_app.test_client()
     status_code, data = test_create_url(client, target_url='https://google.com')
@@ -35,11 +35,12 @@ def test_returns_error_if_no_target_provided(test_app, test_database, test_creat
     assert data['errors']['target_url'] == '\'target_url\' is a required property'
 
 
-def test_returns_error_if_target_is_not_correctly_passed(test_app, test_database, test_create_url):
+def test_adds_prefix_if_target_is_not_correctly_passed(test_app, test_database, test_create_url):
     client = test_app.test_client()
     status_code, data = test_create_url(client, target_url='google.com')
-    assert status_code == 400
-    assert data['message'] == 'Invalid URL \'google.com\': No schema supplied. Perhaps you meant http://google.com?'
+    assert status_code == 201
+    assert data['target_url'] == 'https://google.com'
+    assert data['custom_name']
 
 
 def test_generates_another_custom_name_if_custom_name_is_taken(test_app, test_database, test_create_url):
@@ -60,7 +61,8 @@ def test_generates_a_custom_name_for_provided_invalid_custom_names(test_app, tes
 
 
 # url lookup tests
-def test_if_custom_name_exists_in_db_its_target_url_is_returned(test_app, test_database, test_create_url, test_lookup_url):
+def test_if_custom_name_exists_in_db_its_target_url_is_returned(test_app, test_database, test_create_url,
+                                                                test_lookup_url):
     client = test_app.test_client()
     _, data = test_create_url(client, target_url='https://google.com', custom_name='potato')
     status_code, data = test_lookup_url(client, 'potato')
