@@ -24,15 +24,23 @@ class Url(db.Model):
         self.target_url = target_url
 
     def create_custom(self, custom_name=None):
-        if is_custom_name_valid(custom_name) and not exists_in_db(custom_name):
+        if is_custom_name_valid(custom_name) and not Url.exists_in_db(custom_name):
             self.custom_name = custom_name
         else:
-            self.custom_name = get_word()
+            self.custom_name = self.get_word()
         return self
 
+    @staticmethod
+    def exists_in_db(custom_name):
+        return bool(Url.query.filter_by(custom_name=custom_name).first())
 
-def exists_in_db(custom_name):
-    return bool(Url.query.filter_by(custom_name=custom_name).first())
+    @staticmethod
+    def get_word():
+        resp = requests.get('https://random-words-api.vercel.app/word')
+        word = resp.json()[0]['word']
+        if Url.exists_in_db(word):
+            raise KeyError
+        return word
 
 
 def is_custom_name_valid(custom_name):
@@ -50,11 +58,3 @@ def is_custom_name_valid(custom_name):
             and custom_name.isascii()
             and all(char not in custom_name for char in string.whitespace)
     )
-
-
-def get_word():
-    resp = requests.get('https://random-words-api.vercel.app/word')
-    word = resp.json()[0]['word']
-    if exists_in_db(word):
-        raise KeyError
-    return word
