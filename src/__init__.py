@@ -17,9 +17,6 @@ def create_app(script_info=None):
     from src.api.urls import urls_bp
     app.register_blueprint(urls_bp)
 
-    from src.views.redirects import redirects_bp
-    app.register_blueprint(redirects_bp)
-
     @app.shell_context_processor
     def ctx():
         return {'app': app, 'db': db}
