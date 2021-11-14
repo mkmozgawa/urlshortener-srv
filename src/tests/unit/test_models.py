@@ -1,10 +1,4 @@
-from src.api.models import is_custom_name_valid, is_responding
-
-
-def test_is_responding_rejects_invalid_urls():
-    assert not is_responding('google.com')
-    assert not is_responding('https://thisdomainprobablyshouldntexistpotatosalad.com')
-    assert not is_responding('')
+from src.api.models import is_custom_name_valid
 
 
 def test_is_custom_name_valid_rejects_invalid_names():

@@ -39,7 +39,7 @@ def test_returns_error_if_target_is_not_correctly_passed(test_app, test_database
     client = test_app.test_client()
     status_code, data = test_create_url(client, target_url='google.com')
     assert status_code == 400
-    assert data['message'] == '\'target_url\' is incorrect, did you forget to add https://?'
+    assert data['message'] == 'Invalid URL \'google.com\': No schema supplied. Perhaps you meant http://google.com?'
 
 
 def test_generates_another_custom_name_if_custom_name_is_taken(test_app, test_database, test_create_url):
@@ -84,4 +84,4 @@ def test_only_target_url_is_returned_if_its_mask_is_applied(test_app, test_datab
     assert status_code == 200
     assert data['target_url'] == 'https://google.com'
     with pytest.raises(KeyError):
-        assert data['custom_name'] is None
+        data['custom_name']

@@ -1,3 +1,5 @@
+import json
+
 from flask import Blueprint, request
 from flask_restx import Resource, Api, fields
 
@@ -34,8 +36,8 @@ class UrlsList(Resource):
         custom_name = post_data.get('custom_name')
         try:
             custom_url = Url(target_url).create_custom(custom_name)
-        except ValueError:
-            return {'message': '\'target_url\' is incorrect, did you forget to add https://?'}, 400
+        except ValueError as e:
+            return {'message': str(e)}, 400
         except KeyError:
             return {'message': 'Name generation failed, please try again'}, 400
         db.session.add(custom_url)

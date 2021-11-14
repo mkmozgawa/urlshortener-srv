@@ -3,6 +3,7 @@ import uuid
 
 import requests as requests
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import validates
 
 from src import db
 
@@ -14,11 +15,13 @@ class Url(db.Model):
     target_url = db.Column(db.String(2048))
     custom_name = db.Column(db.String(64), unique=True)
 
+    @validates('target_url')
+    def validate_target_url(self, key, target_url):
+        r = requests.head(target_url)
+        return target_url
+
     def __init__(self, target_url):
-        if is_responding(target_url):
-            self.target_url = target_url
-        else:
-            raise ValueError
+        self.target_url = target_url
 
     def create_custom(self, custom_name=None):
         if is_custom_name_valid(custom_name) and not exists_in_db(custom_name):
@@ -30,14 +33,6 @@ class Url(db.Model):
 
 def exists_in_db(custom_name):
     return bool(Url.query.filter_by(custom_name=custom_name).first())
-
-
-def is_responding(url):
-    try:
-        r = requests.head(url)
-        return r.ok
-    except Exception as e:
-        return False
 
 
 def is_custom_name_valid(custom_name):
