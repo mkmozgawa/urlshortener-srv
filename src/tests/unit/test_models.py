@@ -21,6 +21,12 @@ def test_urls_with_invalid_target_urls_cannot_be_created(test_app, test_database
         Url('')
     with pytest.raises(requests.exceptions.ConnectionError):
         Url('https://thisdomainprobablyshouldntexistpotatosalad.com')
+    with pytest.raises(ValueError):
+        Url('https://gool le.com')
+    with pytest.raises(ValueError):
+        Url('')
+    with pytest.raises(ValueError):
+        Url(None)
 
 
 def test_urls_without_schema_should_have_it_added(test_app, test_database):
