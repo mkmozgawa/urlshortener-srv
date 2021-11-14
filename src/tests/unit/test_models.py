@@ -17,9 +17,9 @@ def test_urls_with_invalid_custom_names_cannot_be_created(test_app, test_databas
 
 
 def test_urls_with_invalid_target_urls_cannot_be_created(test_app, test_database):
-    with pytest.raises(requests.exceptions.InvalidURL):
+    with pytest.raises(ValueError):
         Url('')
-    with pytest.raises(requests.exceptions.ConnectionError):
+    with pytest.raises(ValueError):
         Url('https://thisdomainprobablyshouldntexistpotatosalad.com')
     with pytest.raises(ValueError):
         Url('https://gool le.com')

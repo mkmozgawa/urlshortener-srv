@@ -19,7 +19,6 @@ class Urls(Resource):
     @api.marshal_with(url)
     def get(self, custom_name):
         if not (target_url := Url.find_in_db(custom_name=custom_name)):
-            print(target_url)
             api.abort(404, f'This custom name {custom_name} has no target url, create one with POST')
         return target_url, 200
 
@@ -35,9 +34,9 @@ class UrlsList(Resource):
         try:
             custom_url = Url(target_url).create_custom(custom_name)
         except ValueError:
-            return {'message': 'Target url validation failed'}, 400
+            api.abort(400, f'Target url validation failed')
         except KeyError:
-            return {'message': 'Name generation failed, please try again'}, 400
+            api.abort(400, f'Name generation failed, please try again')
         db.session.add(custom_url)
         db.session.commit()
         return {'target_url': custom_url.target_url, 'custom_name': custom_url.custom_name}, 201

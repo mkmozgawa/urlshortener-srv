@@ -18,14 +18,19 @@ class Url(db.Model):
     @validates('target_url')
     def validate_target_url(self, key, target_url):
         if (
-                target_url is None
+                type(target_url) is not str
+                or not target_url
                 or any(char in target_url for char in string.whitespace)
-                or not target_url.isascii()
         ):
             raise ValueError
         if not (target_url.startswith('http://') or target_url.startswith('https://')):
             target_url = 'https://' + target_url
-        r = requests.head(target_url)
+        try:
+            r = requests.head(target_url)
+            if not r.ok:
+                raise ValueError
+        except requests.exceptions.ConnectionError:
+            raise ValueError
         return target_url
 
     @validates('custom_name')
