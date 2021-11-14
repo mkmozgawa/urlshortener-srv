@@ -1,5 +1,3 @@
-import json
-
 from flask import Blueprint, request
 from flask_restx import Resource, Api, fields
 
@@ -20,10 +18,10 @@ class Urls(Resource):
     @api.doc(responses={200: 'Found', 404: 'Not Found'})
     @api.marshal_with(url)
     def get(self, custom_name):
-        target = Url.query.filter_by(custom_name=custom_name).first()
-        if not target:
+        if not (target_url := Url.find_in_db(custom_name=custom_name)):
+            print(target_url)
             api.abort(404, f'This custom name has no target url, create one with POST')
-        return target, 200
+        return target_url, 200
 
 
 class UrlsList(Resource):

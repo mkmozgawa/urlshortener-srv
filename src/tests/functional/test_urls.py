@@ -60,7 +60,7 @@ def test_generates_a_custom_name_for_provided_invalid_custom_names(test_app, tes
 
 
 # url lookup tests
-def test_if_custom_name_exists_in_db_its_long_form_is_returned(test_app, test_database, test_create_url, test_lookup_url):
+def test_if_custom_name_exists_in_db_its_target_url_is_returned(test_app, test_database, test_create_url, test_lookup_url):
     client = test_app.test_client()
     _, data = test_create_url(client, target_url='https://google.com', custom_name='potato')
     status_code, data = test_lookup_url(client, 'potato')
@@ -69,7 +69,7 @@ def test_if_custom_name_exists_in_db_its_long_form_is_returned(test_app, test_da
     assert data['custom_name'] == 'potato'
 
 
-def test_if_custom_name_doesnt_exist_in_db_message_is_returned(test_app, test_database, test_lookup_url):
+def test_if_custom_name_doesnt_exist_in_db_error_message_is_returned(test_app, test_database, test_lookup_url):
     test_database.session.query(Url).delete()
     client = test_app.test_client()
     status_code, data = test_lookup_url(client, 'potato')

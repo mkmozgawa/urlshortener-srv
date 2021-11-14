@@ -20,41 +20,41 @@ class Url(db.Model):
         r = requests.head(target_url)
         return target_url
 
+    @validates('custom_name')
+    def validate_custom_name(self, key, custom_name):
+        if (
+                3 < len(custom_name) < 26
+                and custom_name.isascii()
+                and all(char not in custom_name for char in string.whitespace)
+        ):
+            return custom_name
+        return Url.get_word()
+
     def __init__(self, target_url):
         self.target_url = target_url
 
     def create_custom(self, custom_name=None):
-        if is_custom_name_valid(custom_name) and not Url.exists_in_db(custom_name):
-            self.custom_name = custom_name
-        else:
+        if Url.exists_in_db(custom_name=custom_name) or custom_name is None:
             self.custom_name = self.get_word()
+        else:
+            self.custom_name = custom_name
         return self
 
     @staticmethod
-    def exists_in_db(custom_name):
-        return bool(Url.query.filter_by(custom_name=custom_name).first())
+    def find_in_db(**kwargs):
+        if 'custom_name' in kwargs.keys():
+            return Url.query.filter_by(custom_name=kwargs['custom_name']).first()
+        if 'target_url' in kwargs.keys():
+            return Url.query.filter_by(target_url=kwargs['target_url']).first()
+
+    @staticmethod
+    def exists_in_db(**kwargs):
+        return bool(Url.find_in_db(**kwargs))
 
     @staticmethod
     def get_word():
         resp = requests.get('https://random-words-api.vercel.app/word')
         word = resp.json()[0]['word']
-        if Url.exists_in_db(word):
+        if Url.exists_in_db(custom_name=word):
             raise KeyError
         return word
-
-
-def is_custom_name_valid(custom_name):
-    """
-    Checks that the name:
-    * is between 4 and 25 chars
-    * contains only ascii chars
-    * doesn't contain any whitespace characters
-    :param custom_name:
-    :return: True if a valid name, False otherwise
-    """
-    return (
-            custom_name
-            and 3 < len(custom_name) < 26
-            and custom_name.isascii()
-            and all(char not in custom_name for char in string.whitespace)
-    )
